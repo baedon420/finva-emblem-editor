@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+/* Shown behind the master canvas and preview canvases so transparent pixels are visible. */
+.checkerboard-bg {
+  background-color: #3f3f46;
+  background-image:
+    linear-gradient(45deg, #52525b 25%, transparent 25%),
+    linear-gradient(-45deg, #52525b 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #52525b 75%),
+    linear-gradient(-45deg, transparent 75%, #52525b 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0px;
+}
