@@ -2,6 +2,10 @@
 
 A browser-based studio for creating clan emblems for **Metal Gear Online 2 (MGO2)**. It turns any image into an emblem that stays readable at the tiny sizes MGO2 actually renders — and lets you fix individual pixels by hand before exporting.
 
+**▶ Use it in your browser — nothing to install:** https://baedon420.github.io/mgo2-emblem-studio/
+
+Everything runs locally in your browser; your images are never uploaded anywhere.
+
 ## What it does (current MVP)
 
 - **Optimize mode** — import an image and prepare it non-destructively:
