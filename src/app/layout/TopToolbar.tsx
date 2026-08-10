@@ -5,7 +5,7 @@ interface TopToolbarProps {
   exportDisabled: boolean;
   mode: AppMode;
   onModeChange: (mode: AppMode) => void;
-  /** Pixel Edit can only be entered once an editable copy exists. */
+  /** Pixel Edit needs an image; entering it auto-bakes an editable copy if none exists. */
   pixelEditAvailable: boolean;
 }
 
@@ -33,7 +33,7 @@ export default function TopToolbar({
           type="button"
           onClick={() => onModeChange('pixelEdit')}
           disabled={!pixelEditAvailable}
-          title={pixelEditAvailable ? undefined : 'Create an editable copy first'}
+          title={pixelEditAvailable ? undefined : 'Upload an image first'}
           className={modeButtonClass(mode === 'pixelEdit')}
         >
           Pixel Edit

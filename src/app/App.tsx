@@ -7,6 +7,7 @@ import { loadImageFromFile } from '../core/io/importImage';
 import type { PixelBuffer } from '../core/types';
 import { validateReadiness } from '../core/validation/mgo2Readiness';
 import { useEditorStore } from '../state/editorStore';
+import type { AppMode } from '../state/editorStore';
 import { useProjectStore } from '../state/projectStore';
 import { selectActiveBuffer } from '../modes/pixelEdit/activeBuffer';
 import PixelEditCanvas from '../modes/pixelEdit/PixelEditCanvas';
@@ -163,6 +164,20 @@ export default function App() {
     setMode('pixelEdit');
   }, [bake, optimizerVersion, setMode]);
 
+  // Entering Pixel Edit with no editable copy bakes one automatically —
+  // a disabled mode button whose only explanation was a hover tooltip proved
+  // to be a dead end for real users.
+  const handleModeChange = useCallback(
+    (nextMode: AppMode) => {
+      if (nextMode === 'pixelEdit' && !useEditorStore.getState().buffer) {
+        handleBake();
+        return;
+      }
+      setMode(nextMode);
+    },
+    [handleBake, setMode],
+  );
+
   const handleExport = useCallback(async () => {
     // Exports resolve through the same selector as previews and validation.
     const { buffer: active, source } = selectActiveBuffer(mode, editBuffer, optimizedBufferRef.current);
@@ -204,8 +219,8 @@ export default function App() {
         onExport={handleExport}
         exportDisabled={!hasImage}
         mode={mode}
-        onModeChange={setMode}
-        pixelEditAvailable={editBuffer !== null}
+        onModeChange={handleModeChange}
+        pixelEditAvailable={hasImage}
       />
       {appError && (
         <div
