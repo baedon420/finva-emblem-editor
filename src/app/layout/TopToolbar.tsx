@@ -23,7 +23,10 @@ export default function TopToolbar({
 }: TopToolbarProps) {
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b border-neutral-800 px-4">
-      <span className="text-sm font-semibold text-neutral-100">MGO2 Emblem Studio</span>
+      <span className="flex items-center gap-2 text-sm font-semibold text-neutral-100">
+        <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="h-6 w-6" />
+        FinVa Emblem Editor
+      </span>
 
       <div className="flex items-center gap-1">
         <button type="button" onClick={() => onModeChange('optimize')} className={modeButtonClass(mode === 'optimize')}>

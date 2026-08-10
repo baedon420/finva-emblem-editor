@@ -1,6 +1,6 @@
-# MGO2 Emblem Studio
+# FinVa Emblem Editor
 
-A browser-based studio for creating clan emblems for **Metal Gear Online 2 (MGO2)**. It turns any image into an emblem that stays readable at the tiny sizes MGO2 actually renders — and lets you fix individual pixels by hand before exporting.
+A browser-based editor for creating clan emblems for **Metal Gear Online 2 (MGO2)**. It turns any image into an emblem that stays readable at the tiny sizes MGO2 actually renders — and lets you fix individual pixels by hand before exporting.
 
 **▶ Use it in your browser — nothing to install:** https://baedon420.github.io/mgo2-emblem-studio/
 
