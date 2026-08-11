@@ -9,8 +9,11 @@ Everything runs locally in your browser; your images are never uploaded anywhere
 ## What it does (current MVP)
 
 - **Optimize mode** — import an image and prepare it non-destructively:
+  - **Playbook** — pick your image type (photo, logo, cartoon/meme, retro poster art, pixel art, text) to get per-type instructions and one-click recipe settings
   - Fit / Fill placement with zoom, horizontal/vertical position, and safe padding
+  - Source Scaling: Auto (smooth resampling when shrinking photos, pixel-perfect when enlarging pixel art), with Smooth/Pixel overrides
   - Background handling: Preserve, make Transparent, or Replace with a flat color (edge-connected removal with a sampled color and adjustable tolerance — enclosed regions of the same color are kept)
+  - Adjustments: Auto Levels (5th–95th percentile stretch), Brightness, Contrast, Saturation — plus the **★ Emblemize** one-click photo→emblem preset
   - Palette: keep Original Colors or reduce to a target of 2–32 colors (deterministic median-cut)
 - **Pixel Edit mode** — bake a 256×256 editable copy of the optimized output and edit it directly:
   - Pen, Eraser, Eyedropper, and Fill Bucket (iterative, 4-connected, exact-RGBA matching)
@@ -20,6 +23,7 @@ Everything runs locally in your browser; your images are never uploaded anywhere
   - 64-step undo/redo (each stroke, fill, or replace is one atomic step)
   - Keyboard shortcuts: **B** pen · **E** eraser · **I** eyedropper · **G** fill · **Ctrl/Cmd+Z** undo · **Ctrl/Cmd+Shift+Z** or **Ctrl+Y** redo
 - **Live previews** at 64×64, 41×41, and 32×32 (nearest-neighbor), always reflecting whichever buffer you are editing
+- **In-Game Simulation panel** — your emblem at approximate true in-game scale (~20px lobby list, ~16px HUD clan tag) on lobby-row and day/night HUD backdrops modeled from real in-game screenshots
 - **MGO2 Readiness panel** — technical checks plus estimated visual checks with plain-language advice
 
 ## Getting started
@@ -60,6 +64,21 @@ The 41×41 preview is display-only and intentionally **not exportable** (see lim
 2. **Bake** — "Create Editable Copy" snapshots the optimized output into a 256×256 editable buffer. The original image and optimizer settings are never modified. If you change optimizer settings later, the copy is flagged as stale and you can re-bake (with an explicit confirmation, since that discards pixel edits).
 3. **Pixel Edit** — fix individual pixels, fill regions, replace colors, and watch the small previews until the emblem reads clearly.
 4. **Export** — download `final_emblem.png` plus the 64×64 / 32×32 previews.
+
+## Playbook — handling different image types
+
+The in-app Playbook panel applies these automatically; the short version:
+
+| Source | Recipe | Watch out for |
+| --- | --- | --- |
+| Photo / portrait | Fill + zoom tight on the face, then Emblemize (auto-levels, contrast +35, saturation +25, 8 colors). Saturation −100 afterward gives a black-and-white poster look. | Warm midtones camouflage into MGO2's tan/brown UI |
+| Logo / symbol | Background → Transparent (sample + tolerance), Auto Levels, ~12 colors | Dark logos vanish on the night HUD once their background is removed |
+| Cartoon / meme | Contrast +15, ~16 colors — skip Emblemize (it blows out flat skin tones) | Crop to the recognizable element, not the whole panel |
+| Retro poster art (Nagel style) | Fill + zoom on the face, contrast +15, saturation +15, 8 colors | Thin line-work vanishes at 16px; pale skin melts into the tan lobby row — replace white backgrounds with black/navy |
+| Pixel art | Source Scaling → Pixel, everything else untouched | Any smoothing or palette change ruins it |
+| Text / lettering | 1–3 big characters max, contrast +50, 8 colors, white/yellow on dark | A whole word is unreadable at 16px |
+
+Whatever the source: judge the result in the In-Game Simulation panel (the big canvas lies by being large), keep to ≤16 colors, and check the silhouette against both the tan and dark backdrops.
 
 ## Known limitations
 
