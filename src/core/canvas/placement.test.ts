@@ -10,6 +10,7 @@ import {
   clampZoom,
   computePlacement,
   getMinZoomForMode,
+  resolveScaleFilter,
 } from './placement';
 import type { PlacementSettings } from './placement';
 
@@ -199,6 +200,23 @@ describe('computePlacement — reset behavior', () => {
     computePlacement(640, 480, customized, TARGET); // simulate a customized render happening first
     const reset = computePlacement(640, 480, { ...DEFAULT_PLACEMENT_SETTINGS }, TARGET);
     expect(reset).toEqual(fresh);
+  });
+});
+
+describe('resolveScaleFilter', () => {
+  it('auto resolves to smooth when the placed rect shrinks the source on either axis', () => {
+    expect(resolveScaleFilter('auto', 1500, 1500, { x: 0, y: 0, width: 256, height: 256 })).toBe('smooth');
+    expect(resolveScaleFilter('auto', 300, 100, { x: 0, y: 0, width: 256, height: 85 })).toBe('smooth');
+  });
+
+  it('auto resolves to pixelated for upscales and exact 1:1 draws', () => {
+    expect(resolveScaleFilter('auto', 32, 32, { x: 0, y: 0, width: 256, height: 256 })).toBe('pixelated');
+    expect(resolveScaleFilter('auto', 256, 256, { x: 0, y: 0, width: 256, height: 256 })).toBe('pixelated');
+  });
+
+  it('explicit smooth and pixelated always override the geometry heuristic', () => {
+    expect(resolveScaleFilter('smooth', 32, 32, { x: 0, y: 0, width: 256, height: 256 })).toBe('smooth');
+    expect(resolveScaleFilter('pixelated', 1500, 1500, { x: 0, y: 0, width: 256, height: 256 })).toBe('pixelated');
   });
 });
 

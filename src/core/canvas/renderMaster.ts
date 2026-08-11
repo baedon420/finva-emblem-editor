@@ -5,7 +5,7 @@ import type { BackgroundSettings } from './background';
 import { MASTER_CANVAS_SIZE } from './masterCanvas';
 import { applyPaletteStrategy } from './palette';
 import type { PaletteSettings } from './palette';
-import { computePlacement } from './placement';
+import { computePlacement, resolveScaleFilter } from './placement';
 import type { PlacementSettings } from './placement';
 import { resizeNearestNeighbor } from './resizeImageData';
 import type { PixelBuffer, PlacedRect, RGBColor } from '../types';
@@ -61,9 +61,19 @@ export function renderMasterCanvas(
   targetSize: number = MASTER_CANVAS_SIZE,
 ): RenderResult {
   const rect = computePlacement(sourceWidth, sourceHeight, placement, targetSize);
-  ctx.imageSmoothingEnabled = false;
+  // The initial source -> master draw is the ONLY place smoothing is ever
+  // allowed: downscaling a large photo with nearest-neighbour discards most
+  // of its pixels and produces severe speckling. Upscales (pixel art) stay
+  // nearest-neighbour, and every later master -> preview scale is always
+  // nearest-neighbour so the diagnostics show honest hard pixels.
+  const filter = resolveScaleFilter(placement.scaleFilter, sourceWidth, sourceHeight, rect);
+  ctx.imageSmoothingEnabled = filter === 'smooth';
+  if (filter === 'smooth') {
+    ctx.imageSmoothingQuality = 'high';
+  }
   ctx.clearRect(0, 0, targetSize, targetSize);
   ctx.drawImage(source, 0, 0, sourceWidth, sourceHeight, rect.x, rect.y, rect.width, rect.height);
+  ctx.imageSmoothingEnabled = false;
 
   let buffer: PixelBuffer = ctx.getImageData(0, 0, targetSize, targetSize);
   let changed = false;

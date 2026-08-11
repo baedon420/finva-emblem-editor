@@ -3,9 +3,20 @@ import type { PlacedRect } from '../types';
 
 export type FitMode = 'contain' | 'fill';
 
+/**
+ * How the source image is resampled onto the master canvas.
+ * 'auto' picks smooth when the draw shrinks the source (photos: nearest-
+ * neighbour downscaling discards most pixels and produces severe speckling)
+ * and pixelated when it enlarges or keeps it 1:1 (pixel art: smoothing would
+ * blur the hard edges that make it readable).
+ */
+export type ScaleFilter = 'auto' | 'smooth' | 'pixelated';
+
 export interface PlacementSettings {
   /** 'contain' (Fit) shows the whole image, letterboxed. 'fill' (Fill) covers the canvas, cropping overflow. */
   mode: FitMode;
+  /** Resampling filter for the source -> master draw. Preview/export scaling is always nearest-neighbour regardless. */
+  scaleFilter: ScaleFilter;
   /** Manual horizontal shift, in master-canvas pixels, from the centered position. */
   offsetX: number;
   /** Manual vertical shift, in master-canvas pixels, from the centered position. */
@@ -32,11 +43,30 @@ export const MAX_PADDING = 32;
 
 export const DEFAULT_PLACEMENT_SETTINGS: PlacementSettings = {
   mode: 'contain',
+  scaleFilter: 'auto',
   offsetX: 0,
   offsetY: 0,
   zoom: 1,
   padding: 0,
 };
+
+/**
+ * Resolves 'auto' against the actual draw geometry: smooth only when the
+ * placed rect is smaller than the source on either axis (a downscale).
+ * Explicit 'smooth'/'pixelated' always win, so users with downscaled pixel
+ * art or upscaled photos can override the heuristic.
+ */
+export function resolveScaleFilter(
+  filter: ScaleFilter,
+  sourceWidth: number,
+  sourceHeight: number,
+  rect: PlacedRect,
+): 'smooth' | 'pixelated' {
+  if (filter !== 'auto') {
+    return filter;
+  }
+  return rect.width < sourceWidth || rect.height < sourceHeight ? 'smooth' : 'pixelated';
+}
 
 /** The minimum permitted zoom depends on mode: Fill can never go below 1x, Fit can go down to MIN_ZOOM. */
 export function getMinZoomForMode(mode: FitMode): number {

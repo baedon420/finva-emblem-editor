@@ -78,6 +78,7 @@ describe('projectStore — Reset restores exact initial placement', () => {
   it('restores Fit mode, zoom 1x, offsets 0, and padding 0 after arbitrary customization', () => {
     useProjectStore.getState().setPlacement({
       mode: 'fill',
+      scaleFilter: 'pixelated',
       zoom: 2.5,
       offsetX: 30,
       offsetY: -20,
@@ -88,6 +89,7 @@ describe('projectStore — Reset restores exact initial placement', () => {
 
     expect(useProjectStore.getState().placement).toEqual({
       mode: 'contain',
+      scaleFilter: 'auto',
       zoom: 1,
       offsetX: 0,
       offsetY: 0,

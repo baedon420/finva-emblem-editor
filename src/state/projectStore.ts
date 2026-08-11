@@ -125,6 +125,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       const nextMode = updates.mode ?? state.placement.mode;
       const next: PlacementSettings = {
         mode: nextMode,
+        scaleFilter: updates.scaleFilter ?? state.placement.scaleFilter,
         offsetX: clampOffset(updates.offsetX ?? state.placement.offsetX),
         offsetY: clampOffset(updates.offsetY ?? state.placement.offsetY),
         // Clamped against the resulting mode, not the previous one, so

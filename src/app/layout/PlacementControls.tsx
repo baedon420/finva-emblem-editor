@@ -1,5 +1,18 @@
 import { MAX_OFFSET, MAX_PADDING, MAX_ZOOM, getMinZoomForMode } from '../../core/canvas/placement';
+import type { ScaleFilter } from '../../core/canvas/placement';
 import { useProjectStore } from '../../state/projectStore';
+
+const SCALE_FILTERS: Array<{ value: ScaleFilter; label: string }> = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'smooth', label: 'Smooth' },
+  { value: 'pixelated', label: 'Pixel' },
+];
+
+const SCALE_FILTER_HINTS: Record<ScaleFilter, string> = {
+  auto: 'Auto: smooth resampling when shrinking large photos (prevents speckling), pixel-perfect when enlarging pixel art.',
+  smooth: 'Smooth: high-quality resampling. Best for photos and detailed art larger than 256px.',
+  pixelated: 'Pixel: nearest-neighbour. Best for pixel art — smoothing would blur its hard edges.',
+};
 
 const modeButtonClass = (active: boolean) =>
   `flex-1 rounded px-2 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-40 ${
@@ -40,6 +53,22 @@ export default function PlacementControls() {
           ? 'Fit: shows the entire image. Empty space may appear around it.'
           : 'Fill: covers the whole canvas. Edges of the image may be cropped. Zoom cannot go below 1x in this mode. (Safe Padding still shrinks the placed area if set.)'}
       </p>
+
+      <label className="mb-1 block text-[10px] uppercase tracking-wide text-neutral-500">Source Scaling</label>
+      <div className="mb-2 flex gap-1">
+        {SCALE_FILTERS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setPlacement({ scaleFilter: value })}
+            disabled={!hasImage}
+            className={modeButtonClass(placement.scaleFilter === value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="mb-4 text-[10px] leading-snug text-neutral-500">{SCALE_FILTER_HINTS[placement.scaleFilter]}</p>
 
       <label className="mb-1 block text-[10px] uppercase tracking-wide text-neutral-500">
         Zoom ({placement.zoom.toFixed(2)}x)

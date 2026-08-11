@@ -104,7 +104,12 @@ export interface ValidationInput {
   visibleColorCount: number;
   /** True when the app's PNG export path is wired up and callable. */
   canExportPng: boolean;
-  /** True when every scaling step in the pipeline used nearest-neighbour. */
+  /**
+   * True when every master -> preview/export scaling step used
+   * nearest-neighbour. The initial source -> master draw may legitimately use
+   * smooth resampling for photo downscales; that is a quality feature, not a
+   * violation — this flag is about the diagnostic/export path staying honest.
+   */
   nearestNeighborEnforced: boolean;
 }
 
@@ -157,7 +162,7 @@ export function validateReadiness(input: ValidationInput): ValidationReport {
   // --- Technical: nearest-neighbour enforcement --------------------------
   technical.push({
     id: 'nearest-neighbor',
-    label: 'Nearest-neighbour scaling enforced by pipeline',
+    label: 'Nearest-neighbour preview/export scaling enforced',
     kind: 'technical',
     status: input.nearestNeighborEnforced ? 'pass' : 'fail',
     advice: input.nearestNeighborEnforced
