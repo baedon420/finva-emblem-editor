@@ -30,6 +30,7 @@ export default function App() {
   const sourceImage = useProjectStore((state) => state.sourceImage);
   const placement = useProjectStore((state) => state.placement);
   const background = useProjectStore((state) => state.background);
+  const adjustments = useProjectStore((state) => state.adjustments);
   const palette = useProjectStore((state) => state.palette);
   const isSampling = useProjectStore((state) => state.isSampling);
   const optimizerVersion = useProjectStore((state) => state.version);
@@ -97,8 +98,9 @@ export default function App() {
     );
   }, [mode, editBuffer, setValidation]);
 
-  // Optimizer pipeline: source -> placement -> background -> palette -> master.
-  // Always recomputed from the original source, never from the rendered canvas.
+  // Optimizer pipeline: source -> placement -> background -> adjustments ->
+  // palette -> master. Always recomputed from the original source, never from
+  // the rendered canvas.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !sourceImage || sourceWidth === null || sourceHeight === null) {
@@ -112,13 +114,24 @@ export default function App() {
       sourceHeight,
       placement,
       background,
+      adjustments,
       palette,
       MASTER_CANVAS_SIZE,
     );
     optimizedBufferRef.current = result.masterBuffer;
     setPlacedRect(result.placedRect);
     setPaletteInfo(result.paletteInfo);
-  }, [sourceImage, sourceWidth, sourceHeight, placement, background, palette, setPlacedRect, setPaletteInfo]);
+  }, [
+    sourceImage,
+    sourceWidth,
+    sourceHeight,
+    placement,
+    background,
+    adjustments,
+    palette,
+    setPlacedRect,
+    setPaletteInfo,
+  ]);
 
   // Previews + validation follow the active buffer, re-running whenever the
   // optimizer output changes, the pixel buffer is edited, or the mode changes.
@@ -262,7 +275,7 @@ export default function App() {
         <div className={pixelEditActive ? 'hidden' : 'contents'}>
           <CenterCanvas canvasRef={canvasRef} samplingActive={isSampling} onSampleClick={handleSampleClick} />
         </div>
-        <RightPanel />
+        <RightPanel previews={previews} />
       </div>
       <PreviewBar previews={previews} hasImage={hasImage} />
     </div>

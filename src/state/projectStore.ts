@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { DEFAULT_ADJUSTMENT_SETTINGS, clampAdjustment } from '../core/canvas/adjustments';
+import type { AdjustmentSettings } from '../core/canvas/adjustments';
 import { DEFAULT_BACKGROUND_SETTINGS, clampTolerance } from '../core/canvas/background';
 import type { BackgroundSettings } from '../core/canvas/background';
 import { DEFAULT_PALETTE_SETTINGS, clampPaletteTarget } from '../core/canvas/palette';
@@ -31,6 +33,7 @@ interface ProjectState {
   sourceImage: HTMLImageElement | null;
   placement: PlacementSettings;
   background: BackgroundSettings;
+  adjustments: AdjustmentSettings;
   palette: PaletteSettings;
   /** Latest color counts/palette computed by the render pipeline, for display only. */
   paletteInfo: PaletteInfo;
@@ -50,6 +53,8 @@ interface ProjectState {
   resetPlacement: () => void;
   setBackground: (updates: Partial<BackgroundSettings>) => void;
   resetBackground: () => void;
+  setAdjustments: (updates: Partial<AdjustmentSettings>) => void;
+  resetAdjustments: () => void;
   setPalette: (updates: Partial<PaletteSettings>) => void;
   resetPalette: () => void;
   setPaletteInfo: (info: PaletteInfo) => void;
@@ -67,6 +72,7 @@ const initialStatus = {
   sourceImage: null,
   placement: { ...DEFAULT_PLACEMENT_SETTINGS },
   background: { ...DEFAULT_BACKGROUND_SETTINGS },
+  adjustments: { ...DEFAULT_ADJUSTMENT_SETTINGS },
   palette: { ...DEFAULT_PALETTE_SETTINGS },
   paletteInfo: { ...INITIAL_PALETTE_INFO },
   validation: null,
@@ -82,6 +88,8 @@ const initialStatus = {
   | 'resetPlacement'
   | 'setBackground'
   | 'resetBackground'
+  | 'setAdjustments'
+  | 'resetAdjustments'
   | 'setPalette'
   | 'resetPalette'
   | 'setPaletteInfo'
@@ -103,6 +111,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       sourceImage: image,
       placement: { ...DEFAULT_PLACEMENT_SETTINGS },
       background: { ...DEFAULT_BACKGROUND_SETTINGS },
+      adjustments: { ...DEFAULT_ADJUSTMENT_SETTINGS },
       palette: { ...DEFAULT_PALETTE_SETTINGS },
       paletteInfo: { ...INITIAL_PALETTE_INFO },
       validation: null,
@@ -139,6 +148,18 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }),
   resetBackground: () =>
     set((state) => ({ background: { ...DEFAULT_BACKGROUND_SETTINGS }, version: state.version + 1 })),
+  setAdjustments: (updates) =>
+    set((state) => {
+      const next: AdjustmentSettings = {
+        autoLevels: updates.autoLevels ?? state.adjustments.autoLevels,
+        brightness: clampAdjustment(updates.brightness ?? state.adjustments.brightness),
+        contrast: clampAdjustment(updates.contrast ?? state.adjustments.contrast),
+        saturation: clampAdjustment(updates.saturation ?? state.adjustments.saturation),
+      };
+      return { adjustments: next, version: state.version + 1 };
+    }),
+  resetAdjustments: () =>
+    set((state) => ({ adjustments: { ...DEFAULT_ADJUSTMENT_SETTINGS }, version: state.version + 1 })),
   setPalette: (updates) =>
     set((state) => {
       const next: PaletteSettings = {
@@ -157,6 +178,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       ...initialStatus,
       placement: { ...DEFAULT_PLACEMENT_SETTINGS },
       background: { ...DEFAULT_BACKGROUND_SETTINGS },
+      adjustments: { ...DEFAULT_ADJUSTMENT_SETTINGS },
       palette: { ...DEFAULT_PALETTE_SETTINGS },
       paletteInfo: { ...INITIAL_PALETTE_INFO },
       validation: null,

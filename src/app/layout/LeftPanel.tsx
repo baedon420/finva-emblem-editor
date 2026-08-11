@@ -1,5 +1,6 @@
 import PixelEditControls from '../../modes/pixelEdit/PixelEditControls';
 import { useEditorStore } from '../../state/editorStore';
+import AdjustmentControls from './AdjustmentControls';
 import BackgroundControls from './BackgroundControls';
 import PaletteControls from './PaletteControls';
 import PlacementControls from './PlacementControls';
@@ -52,6 +53,7 @@ export default function LeftPanel({
         <>
           <PlacementControls />
           <BackgroundControls />
+          <AdjustmentControls />
           <PaletteControls />
         </>
       )}

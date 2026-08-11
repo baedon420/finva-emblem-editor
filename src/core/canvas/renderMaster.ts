@@ -1,3 +1,5 @@
+import { applyAdjustments } from './adjustments';
+import type { AdjustmentSettings } from './adjustments';
 import { applyBackgroundStrategy } from './background';
 import type { BackgroundSettings } from './background';
 import { MASTER_CANVAS_SIZE } from './masterCanvas';
@@ -9,8 +11,10 @@ import { resizeNearestNeighbor } from './resizeImageData';
 import type { PixelBuffer, PlacedRect, RGBColor } from '../types';
 
 /** Sizes the pipeline produces previews for. 64 and 32 are the spec's required
- *  diagnostic sizes; 41 is the approximate (unconfirmed) in-game simulation. */
-export const PREVIEW_SIZES = [64, 41, 32] as const;
+ *  diagnostic sizes; 41 is the approximate (unconfirmed) in-game simulation.
+ *  20 and 16 approximate the lobby-list and HUD clan-tag display sizes
+ *  measured from real in-game reference screenshots (2026-08-11). */
+export const PREVIEW_SIZES = [64, 41, 32, 20, 16] as const;
 
 /** Nearest-neighbour downscales of any buffer at every preview size. */
 export function computePreviews(buffer: PixelBuffer): Record<number, PixelBuffer> {
@@ -38,11 +42,12 @@ export interface RenderResult {
 
 /**
  * Renders the master canvas from scratch using the *original* source image
- * plus the current placement, background, and palette settings. The pipeline
- * is always, in order: source -> placement -> background -> palette -> master
- * canvas. Each stage reads the previous stage's freshly-computed buffer —
- * never a previously rendered/masked/quantized canvas — so repeated setting
- * changes in any stage never compound quality loss or accumulate state.
+ * plus the current placement, background, adjustment, and palette settings.
+ * The pipeline is always, in order: source -> placement -> background ->
+ * adjustments -> palette -> master canvas. Each stage reads the previous
+ * stage's freshly-computed buffer — never a previously rendered/masked/
+ * quantized canvas — so repeated setting changes in any stage never compound
+ * quality loss or accumulate state.
  */
 export function renderMasterCanvas(
   ctx: CanvasRenderingContext2D,
@@ -51,6 +56,7 @@ export function renderMasterCanvas(
   sourceHeight: number,
   placement: PlacementSettings,
   background: BackgroundSettings,
+  adjustments: AdjustmentSettings,
   palette: PaletteSettings,
   targetSize: number = MASTER_CANVAS_SIZE,
 ): RenderResult {
@@ -68,6 +74,12 @@ export function renderMasterCanvas(
       buffer = afterBackground;
       changed = true;
     }
+  }
+
+  const afterAdjustments = applyAdjustments(buffer, adjustments);
+  if (afterAdjustments !== buffer) {
+    buffer = afterAdjustments;
+    changed = true;
   }
 
   const paletteResult = applyPaletteStrategy(buffer, palette);

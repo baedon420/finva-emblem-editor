@@ -1,5 +1,7 @@
+import type { PixelBuffer } from '../../core/types';
 import type { CheckStatus, ReadinessStatus, ValidationCheck } from '../../core/validation/mgo2Readiness';
 import { useProjectStore } from '../../state/projectStore';
+import InGamePreview from './InGamePreview';
 
 const STATUS_PRESENTATION: Record<ReadinessStatus, { label: string; className: string }> = {
   ready: { label: 'MGO2 READY', className: 'bg-emerald-500/15 text-emerald-300 border-emerald-600/40' },
@@ -56,12 +58,27 @@ function CheckRow({ check }: { check: ValidationCheck }) {
   );
 }
 
-export default function RightPanel() {
+interface RightPanelProps {
+  /** Preview buffers from the render pipeline, keyed by size; used by the in-game simulation. */
+  previews: Record<number, PixelBuffer> | null;
+}
+
+export default function RightPanel({ previews }: RightPanelProps) {
   const validation = useProjectStore((state) => state.validation);
+  const hasImage = useProjectStore((state) => state.hasImage);
 
   return (
     <aside className="w-72 shrink-0 overflow-y-auto border-l border-neutral-800 p-4">
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">MGO2 Readiness</h2>
+      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">In-Game Simulation</h2>
+      {hasImage && previews ? (
+        <InGamePreview previews={previews} />
+      ) : (
+        <p className="mb-4 text-xs text-neutral-500">Upload an image to see the in-game simulation.</p>
+      )}
+
+      <h2 className="mb-2 border-t border-neutral-800 pt-4 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+        MGO2 Readiness
+      </h2>
 
       {!validation ? (
         <p className="text-xs text-neutral-500">Upload an image to run validation.</p>
